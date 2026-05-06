@@ -128,6 +128,10 @@ export async function generateSubmissionPdfBuffer(
 
   drawSectionTitle("Required Supporting Documents");
   drawRow(
+    "Supplier Passport Photograph",
+    input.supplierDocumentNames.supplierPassport ?? "-"
+  );
+  drawRow(
     "Certificate of incorporation of business",
     input.supplierDocumentNames.certificateOfIncorporation ?? "-"
   );

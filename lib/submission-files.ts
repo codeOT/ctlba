@@ -1,4 +1,5 @@
 export const SUPPLIER_FILE_FIELDS = [
+  "supplierPassport",
   "certificateOfIncorporation",
   "statusReport",
   "annualReturnsLetter",

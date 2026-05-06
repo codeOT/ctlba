@@ -128,6 +128,10 @@ function downloadSubmissionPdf(entry: ApplicationSubmission) {
 
   drawSectionTitle("Required Supporting Documents");
   drawRow(
+    "Supplier Passport Photograph",
+    entry.supplierDocumentNames.supplierPassport ?? "-"
+  );
+  drawRow(
     "Certificate of incorporation of business",
     entry.supplierDocumentNames.certificateOfIncorporation ?? "-"
   );

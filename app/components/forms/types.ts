@@ -57,6 +57,7 @@ export type GuarantorFormData = {
 };
 
 export type SupportingDocuments = {
+  supplierPassport: File | null;
   certificateOfIncorporation: File | null;
   statusReport: File | null;
   annualReturnsLetter: File | null;
@@ -146,6 +147,7 @@ export const defaultGuarantorData: GuarantorFormData = {
 };
 
 export const defaultSupportingDocuments: SupportingDocuments = {
+  supplierPassport: null,
   certificateOfIncorporation: null,
   statusReport: null,
   annualReturnsLetter: null,

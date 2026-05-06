@@ -314,6 +314,10 @@ export default function SupplierOnboardingPortal({
 
     drawSectionTitle("Required Supporting Documents");
     drawRow(
+      "Supplier Passport Photograph",
+      supportingDocuments.supplierPassport?.name ?? "-"
+    );
+    drawRow(
       "Certificate of incorporation of business",
       supportingDocuments.certificateOfIncorporation?.name ?? "-"
     );

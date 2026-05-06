@@ -311,6 +311,15 @@ export default function SupplierForm({
         </p>
         <div className="grid gap-4 md:grid-cols-2">
           <FileField
+            label="Supplier Passport Photograph"
+            onChange={(file) =>
+              setSupportingDocuments((prev) => ({
+                ...prev,
+                supplierPassport: file,
+              }))
+            }
+          />
+          <FileField
             label="Certificate of incorporation of business"
             onChange={(file) =>
               setSupportingDocuments((prev) => ({
