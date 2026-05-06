@@ -11,7 +11,7 @@ const poppins = Poppins({
 
 export const metadata: Metadata = {
   title: "LBA Supplier Portal",
-  description: "Supplier and guarantor online onboarding portal for LBA.",
+  description: "Cardinal Torch Company Limited onboarding supplier form for Local Buying Agents (LBA)",
 };
 
 export default function RootLayout({
