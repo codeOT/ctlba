@@ -8,6 +8,8 @@ type SubmissionPdfInput = {
   guarantorData: GuarantorFormData;
   supplierDocumentNames: Record<string, string>;
   guarantorDocumentNames: Record<string, string>;
+  supplierPassportImageDataUrl?: string;
+  guarantorPassportImageDataUrl?: string;
 };
 
 export async function generateSubmissionPdfBuffer(
@@ -22,6 +24,8 @@ export async function generateSubmissionPdfBuffer(
   const valueWidth = tableWidth - labelWidth;
   const lineHeight = 12;
   let y = 34;
+  const getJsPdfImageType = (dataUrl: string) =>
+    dataUrl.startsWith("data:image/png") ? "PNG" : "JPEG";
 
   const addPageIfNeeded = (neededHeight: number) => {
     if (y + neededHeight <= pageHeight - 32) {
@@ -60,20 +64,51 @@ export async function generateSubmissionPdfBuffer(
     y += rowHeight;
   };
 
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
-  doc.text("CARDINAL TORCH COMPANY LIMITED", margin, y);
-  y += 18;
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(12);
-  doc.text("Supplier Application Form", margin, y);
-  y += 18;
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.text(`Submission ID: ${input.submissionId}`, margin, y);
-  y += 12;
-  doc.text(`Submitted: ${input.submittedAt.toLocaleString()}`, margin, y);
-  y += 14;
+  if (input.supplierPassportImageDataUrl) {
+    const imageW = 68;
+    const imageH = 86;
+    doc.setDrawColor(150, 150, 150);
+    doc.rect(margin, y, imageW, imageH);
+    doc.addImage(
+      input.supplierPassportImageDataUrl,
+      getJsPdfImageType(input.supplierPassportImageDataUrl),
+      margin + 1,
+      y + 1,
+      imageW - 2,
+      imageH - 2
+    );
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.text("Supplier Passport", margin, y + imageH + 10);
+
+    const textX = margin + imageW + 12;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.text("CARDINAL TORCH COMPANY LIMITED", textX, y + 16);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.text("Supplier Application Form", textX, y + 34);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.text(`Submission ID: ${input.submissionId}`, textX, y + 50);
+    doc.text(`Submitted: ${input.submittedAt.toLocaleString()}`, textX, y + 64);
+    y += imageH + 22;
+  } else {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.text("CARDINAL TORCH COMPANY LIMITED", margin, y);
+    y += 18;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.text("Supplier Application Form", margin, y);
+    y += 18;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.text(`Submission ID: ${input.submissionId}`, margin, y);
+    y += 12;
+    doc.text(`Submitted: ${input.submittedAt.toLocaleString()}`, margin, y);
+    y += 14;
+  }
 
   drawSectionTitle("Business Information");
   drawRow("Date", input.supplierData.date);
@@ -165,6 +200,25 @@ export async function generateSubmissionPdfBuffer(
   );
 
   drawSectionTitle("Guarantor Information");
+  if (input.guarantorPassportImageDataUrl) {
+    const rowHeight = 96;
+    addPageIfNeeded(rowHeight);
+    doc.setDrawColor(150, 150, 150);
+    doc.rect(margin, y, labelWidth, rowHeight);
+    doc.rect(margin + labelWidth, y, valueWidth, rowHeight);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.text("Guarantor Passport Photograph", margin + 4, y + 14);
+    doc.addImage(
+      input.guarantorPassportImageDataUrl,
+      getJsPdfImageType(input.guarantorPassportImageDataUrl),
+      margin + labelWidth + 6,
+      y + 6,
+      70,
+      84
+    );
+    y += rowHeight;
+  }
   drawRow("Date", input.guarantorData.date);
   drawRow("Name", input.guarantorData.name);
   drawRow("Gender", input.guarantorData.gender);

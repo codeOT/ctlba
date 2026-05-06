@@ -54,7 +54,8 @@ export default function SupplierForm({
           }
         />
         <Field
-          label="Business Trading Name"
+          label="Company/Business Date of Registration"
+          type="date"
           value={supplierData.businessTradingName}
           onChange={(value) =>
             setSupplierData((prev) => ({ ...prev, businessTradingName: value }))
@@ -68,7 +69,7 @@ export default function SupplierForm({
           }
         />
         <Field
-          label="Is the Business a Member of Cocoa Association of Nigeria?"
+          label="Is the Business a Member of any Association of Nigeria? If any, state"
           value={supplierData.cocoaAssociationMember}
           onChange={(value) =>
             setSupplierData((prev) => ({ ...prev, cocoaAssociationMember: value }))
@@ -307,7 +308,8 @@ export default function SupplierForm({
           Required Supporting Documents
         </h3>
         <p className="mb-4 text-sm text-zinc-700">
-          Upload all documents below. Every file is required.
+          Upload all documents below. Note: Executed Guarantor Form, Proof of
+          registration with FIRS, and Audited Financial Statements are optional.
         </p>
         <div className="grid gap-4 md:grid-cols-2">
           <FileField
@@ -350,7 +352,7 @@ export default function SupplierForm({
             }
           />
           <FileField
-            label="Proof of registration with FIRS"
+            label="Proof of registration with FIRS (Optional)"
             onChange={(file) =>
               setSupportingDocuments((prev) => ({
                 ...prev,
@@ -359,7 +361,7 @@ export default function SupplierForm({
             }
           />
           <FileField
-            label="Audited financial statements"
+            label="Audited financial statements (Optional)"
             onChange={(file) =>
               setSupportingDocuments((prev) => ({
                 ...prev,
@@ -377,7 +379,7 @@ export default function SupplierForm({
             }
           />
           <FileField
-            label="Executed Guarantor Form"
+            label="Executed Guarantor Form (Optional)"
             onChange={(file) =>
               setSupportingDocuments((prev) => ({
                 ...prev,

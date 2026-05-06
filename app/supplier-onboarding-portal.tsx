@@ -199,7 +199,7 @@ export default function SupplierOnboardingPortal({
     }
   };
 
-  const handleDownloadCopy = () => {
+  const handleDownloadCopy = async () => {
     const pdf = new jsPDF({ unit: "pt", format: "a4" });
     const pageHeight = pdf.internal.pageSize.getHeight();
     const pageWidth = pdf.internal.pageSize.getWidth();
@@ -209,6 +209,39 @@ export default function SupplierOnboardingPortal({
     const valueWidth = tableWidth - labelWidth;
     const lineHeight = 12;
     let y = 34;
+    const supplierPassportFile = supportingDocuments.supplierPassport;
+    const guarantorPassportFile = guarantorSupportingDocuments.passportPhotograph;
+
+    const readImageFileAsDataUrl = (file: File) =>
+      new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = typeof reader.result === "string" ? reader.result : "";
+          if (!result) {
+            reject(new Error("Could not read image file"));
+            return;
+          }
+          resolve(result);
+        };
+        reader.onerror = () => reject(new Error("Could not read image file"));
+        reader.readAsDataURL(file);
+      });
+
+    const loadImageDataUrl = async (file: File | null | undefined) => {
+      if (!file || !file.type.startsWith("image/")) {
+        return null;
+      }
+      try {
+        return await readImageFileAsDataUrl(file);
+      } catch {
+        return null;
+      }
+    };
+    const getJsPdfImageType = (dataUrl: string) =>
+      dataUrl.startsWith("data:image/png") ? "PNG" : "JPEG";
+
+    const supplierPassportImage = await loadImageDataUrl(supplierPassportFile);
+    const guarantorPassportImage = await loadImageDataUrl(guarantorPassportFile);
 
     const addPageIfNeeded = (neededHeight: number) => {
       if (y + neededHeight <= pageHeight - 32) {
@@ -247,18 +280,48 @@ export default function SupplierOnboardingPortal({
       y += rowHeight;
     };
 
-    pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(14);
-    pdf.text("CARDINAL TORCH COMPANY LIMITED", margin, y);
-    y += 18;
-    pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(12);
-    pdf.text("Supplier Application Form", margin, y);
-    y += 18;
-    pdf.setFont("helvetica", "normal");
-    pdf.setFontSize(9);
-    pdf.text(`Generated: ${submittedAt || new Date().toLocaleString()}`, margin, y);
-    y += 14;
+    if (supplierPassportImage) {
+      const imageW = 68;
+      const imageH = 86;
+      pdf.setDrawColor(150, 150, 150);
+      pdf.rect(margin, y, imageW, imageH);
+      pdf.addImage(
+        supplierPassportImage,
+        getJsPdfImageType(supplierPassportImage),
+        margin + 1,
+        y + 1,
+        imageW - 2,
+        imageH - 2
+      );
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(8);
+      pdf.text("Supplier Passport", margin, y + imageH + 10);
+
+      const textX = margin + imageW + 12;
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(14);
+      pdf.text("CARDINAL TORCH COMPANY LIMITED", textX, y + 16);
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(12);
+      pdf.text("Supplier Application Form", textX, y + 34);
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(9);
+      pdf.text(`Generated: ${submittedAt || new Date().toLocaleString()}`, textX, y + 50);
+      y += imageH + 22;
+    } else {
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(14);
+      pdf.text("CARDINAL TORCH COMPANY LIMITED", margin, y);
+      y += 18;
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(12);
+      pdf.text("Supplier Application Form", margin, y);
+      y += 18;
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(9);
+      pdf.text(`Generated: ${submittedAt || new Date().toLocaleString()}`, margin, y);
+      y += 14;
+    }
 
     drawSectionTitle("Business Information");
     drawRow("Date", supplierData.date);
@@ -348,6 +411,25 @@ export default function SupplierOnboardingPortal({
     );
 
     drawSectionTitle("Guarantor Information");
+    if (guarantorPassportImage) {
+      const rowHeight = 96;
+      addPageIfNeeded(rowHeight);
+      pdf.setDrawColor(150, 150, 150);
+      pdf.rect(margin, y, labelWidth, rowHeight);
+      pdf.rect(margin + labelWidth, y, valueWidth, rowHeight);
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(9);
+      pdf.text("Guarantor Passport Photograph", margin + 4, y + 14);
+      pdf.addImage(
+        guarantorPassportImage,
+        getJsPdfImageType(guarantorPassportImage),
+        margin + labelWidth + 6,
+        y + 6,
+        70,
+        84
+      );
+      y += rowHeight;
+    }
     drawRow("Date", guarantorData.date);
     drawRow("Name", guarantorData.name);
     drawRow("Gender", guarantorData.gender);

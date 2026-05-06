@@ -3,203 +3,30 @@
 import { signOut } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
-import { jsPDF } from "jspdf";
 import { useEffect, useState } from "react";
 import { ApplicationSubmission } from "../components/forms/types";
 
 type StatusFilter = "all" | "pending" | "accepted" | "rejected";
 
-function downloadSubmissionPdf(entry: ApplicationSubmission) {
-  const doc = new jsPDF({ unit: "pt", format: "a4" });
-  const pageHeight = doc.internal.pageSize.getHeight();
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const margin = 28;
-  const tableWidth = pageWidth - margin * 2;
-  const labelWidth = tableWidth * 0.45;
-  const valueWidth = tableWidth - labelWidth;
-  const lineHeight = 12;
-  let y = 34;
+async function downloadSubmissionPdf(entry: ApplicationSubmission) {
+  const response = await fetch(`/api/submissions/${entry.id}`, {
+    method: "POST",
+  });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    window.alert(body.error ?? "Failed to generate PDF.");
+    return;
+  }
 
-  const addPageIfNeeded = (neededHeight: number) => {
-    if (y + neededHeight <= pageHeight - 32) {
-      return;
-    }
-    doc.addPage();
-    y = 34;
-  };
-
-  const drawSectionTitle = (title: string) => {
-    addPageIfNeeded(26);
-    doc.setFillColor(245, 245, 245);
-    doc.rect(margin, y, tableWidth, 20, "F");
-    doc.setDrawColor(120, 120, 120);
-    doc.rect(margin, y, tableWidth, 20);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
-    doc.text(title, margin + 8, y + 13);
-    y += 20;
-  };
-
-  const drawRow = (label: string, value: string) => {
-    const labelLines = doc.splitTextToSize(label || "-", labelWidth - 10);
-    const valueLines = doc.splitTextToSize(value || "-", valueWidth - 10);
-    const rowLineCount = Math.max(labelLines.length, valueLines.length, 1);
-    const rowHeight = Math.max(18, rowLineCount * lineHeight + 6);
-    addPageIfNeeded(rowHeight);
-
-    doc.setDrawColor(150, 150, 150);
-    doc.rect(margin, y, labelWidth, rowHeight);
-    doc.rect(margin + labelWidth, y, valueWidth, rowHeight);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.text(labelLines, margin + 4, y + 12);
-    doc.text(valueLines, margin + labelWidth + 4, y + 12);
-    y += rowHeight;
-  };
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
-  doc.text("CARDINAL TORCH COMPANY LIMITED", margin, y);
-  y += 18;
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(12);
-  doc.text("Supplier Application Form", margin, y);
-  y += 18;
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.text(`Submission ID: ${entry.id}`, margin, y);
-  y += 12;
-  doc.text(`Submitted: ${entry.submittedAt}`, margin, y);
-  y += 12;
-  doc.text(`Review Status: ${entry.status.toUpperCase()}`, margin, y);
-  y += 14;
-
-  drawSectionTitle("Business Information");
-  drawRow("Date", entry.supplierData.date);
-  drawRow("Type of Business", entry.supplierData.typeOfBusiness);
-  drawRow(
-    "Registered Company Name / Business Name",
-    entry.supplierData.registeredCompanyName
-  );
-  drawRow("Business Trading Name", entry.supplierData.businessTradingName);
-  drawRow(
-    "Company/Business Registration Number",
-    entry.supplierData.companyRegistrationNumber
-  );
-  drawRow(
-    "Member of Cocoa Association of Nigeria?",
-    entry.supplierData.cocoaAssociationMember
-  );
-  drawRow("Nature of Business", entry.supplierData.natureOfBusiness);
-  drawRow("Address", entry.supplierData.address);
-  drawRow("E-mail Address", entry.supplierData.email);
-  drawRow("Telephone Number", entry.supplierData.telephoneNumber);
-  drawRow("VAT Number", entry.supplierData.vatNumber);
-  drawRow("TIN Number", entry.supplierData.tinNumber);
-  drawRow("Years in Business", entry.supplierData.yearsInBusiness);
-
-  drawSectionTitle("Directors / Partners / Proprietors - 1");
-  drawRow("Name", entry.supplierData.director1Name);
-  drawRow("NIN", entry.supplierData.director1Nin);
-  drawRow("BVN", entry.supplierData.director1Bvn);
-  drawRow("Telephone Number", entry.supplierData.director1Telephone);
-  drawRow("Address", entry.supplierData.director1Address);
-  drawRow("E-mail Address", entry.supplierData.director1Email);
-
-  drawSectionTitle("Directors / Partners / Proprietors - 2");
-  drawRow("Name", entry.supplierData.director2Name);
-  drawRow("NIN", entry.supplierData.director2Nin);
-  drawRow("BVN", entry.supplierData.director2Bvn);
-  drawRow("Telephone Number", entry.supplierData.director2Telephone);
-  drawRow("Address", entry.supplierData.director2Address);
-  drawRow("E-mail Address", entry.supplierData.director2Email);
-
-  drawSectionTitle("Business Banking Information");
-  drawRow("Bank Name", entry.supplierData.bankName);
-  drawRow("Account Number", entry.supplierData.accountNumber);
-  drawRow("Account Name", entry.supplierData.accountName);
-  drawRow("Payment Method", entry.supplierData.paymentMethod);
-
-  drawSectionTitle("Declaration by Applicant");
-  drawRow("Name", entry.supplierData.declarationName);
-  drawRow("Title", entry.supplierData.declarationTitle);
-  drawRow("Signature Date", entry.supplierData.declarationSignatureDate);
-  drawRow("Signature Provided", entry.supplierSignatureProvided ? "Yes" : "No");
-
-  drawSectionTitle("Required Supporting Documents");
-  drawRow(
-    "Supplier Passport Photograph",
-    entry.supplierDocumentNames.supplierPassport ?? "-"
-  );
-  drawRow(
-    "Certificate of incorporation of business",
-    entry.supplierDocumentNames.certificateOfIncorporation ?? "-"
-  );
-  drawRow("Status report of business", entry.supplierDocumentNames.statusReport ?? "-");
-  drawRow(
-    "Letter acknowledging annual returns filing",
-    entry.supplierDocumentNames.annualReturnsLetter ?? "-"
-  );
-  drawRow(
-    "Proof of current business address",
-    entry.supplierDocumentNames.currentBusinessAddressProof ?? "-"
-  );
-  drawRow(
-    "Proof of registration with FIRS",
-    entry.supplierDocumentNames.firsRegistrationProof ?? "-"
-  );
-  drawRow(
-    "Audited financial statements",
-    entry.supplierDocumentNames.auditedFinancialStatements ?? "-"
-  );
-  drawRow(
-    "Valid means of identification",
-    entry.supplierDocumentNames.validMeansOfIdentification ?? "-"
-  );
-  drawRow(
-    "Executed Guarantor Form",
-    entry.supplierDocumentNames.executedGuarantorForm ?? "-"
-  );
-
-  drawSectionTitle("Guarantor Information");
-  drawRow("Date", entry.guarantorData.date);
-  drawRow("Name", entry.guarantorData.name);
-  drawRow("Gender", entry.guarantorData.gender);
-  drawRow("Type of Identification", entry.guarantorData.identificationType);
-  drawRow("Identification Number", entry.guarantorData.identificationNumber);
-  drawRow("Address", entry.guarantorData.address);
-  drawRow("Nationality", entry.guarantorData.nationality);
-  drawRow("State of Origin", entry.guarantorData.stateOfOrigin);
-  drawRow("Local Government Area", entry.guarantorData.localGovernmentArea);
-  drawRow("Telephone Number", entry.guarantorData.telephoneNumber);
-  drawRow("NIN", entry.guarantorData.nin);
-  drawRow("BVN", entry.guarantorData.bvn);
-  drawRow("Occupation", entry.guarantorData.occupation);
-  drawRow("Years in Business/Profession", entry.guarantorData.yearsInProfession);
-  drawRow("Net Worth", entry.guarantorData.netWorth);
-  drawRow("E-mail Address", entry.guarantorData.emailAddress);
-  drawRow(
-    "Relationship with Applicant",
-    entry.guarantorData.relationshipWithApplicant
-  );
-  drawRow("Contract Reference", entry.guarantorData.declarationContractReference);
-  drawRow("Guarantor Declaration Name", entry.guarantorData.declarationGuarantorName);
-  drawRow("Guarantor Signature Date", entry.guarantorData.declarationSignatureDate);
-  drawRow("Guarantor Signature Provided", entry.guarantorSignatureProvided ? "Yes" : "No");
-  drawRow(
-    "Passport Photograph",
-    entry.guarantorDocumentNames.passportPhotograph ?? "-"
-  );
-  drawRow(
-    "Means of Identification",
-    entry.guarantorDocumentNames.meansOfIdentification ?? "-"
-  );
-  drawRow(
-    "Proof of Present Address (Utility Bills)",
-    entry.guarantorDocumentNames.proofOfPresentAddress ?? "-"
-  );
-
-  doc.save(`lba-submission-${entry.id}.pdf`);
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = `lba-submission-${entry.id}.pdf`;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  window.URL.revokeObjectURL(url);
 }
 
 export default function AdminReviewPortal() {
@@ -451,7 +278,7 @@ export default function AdminReviewPortal() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => downloadSubmissionPdf(item)}
+                    onClick={() => void downloadSubmissionPdf(item)}
                     className="rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100"
                   >
                     Download PDF

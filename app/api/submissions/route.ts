@@ -85,6 +85,8 @@ export async function POST(request: Request) {
   const supplierFileIds: Record<string, string> = {};
   const guarantorFileIds: Record<string, string> = {};
   const uploadedFileAttachments: Array<{ filename: string; content: Buffer }> = [];
+  let supplierPassportImageDataUrl: string | undefined;
+  let guarantorPassportImageDataUrl: string | undefined;
 
   try {
     await Promise.all(
@@ -97,10 +99,16 @@ export async function POST(request: Request) {
           throw new Error(`File ${key} exceeds 10MB`);
         }
         const buffer = Buffer.from(await file.arrayBuffer());
+        if (key === "supplierPassport" && file.type.startsWith("image/")) {
+          supplierPassportImageDataUrl = `data:${file.type};base64,${buffer.toString(
+            "base64"
+          )}`;
+        }
         const id = await uploadBufferToGridFS(buffer, file.name, {
           field: key,
           owner: session.user.id,
           kind: "supplier",
+          contentType: file.type || undefined,
         });
         supplierFileIds[key] = id;
         supplierDocumentNames[key] = file.name;
@@ -118,10 +126,16 @@ export async function POST(request: Request) {
           throw new Error(`File ${key} exceeds 10MB`);
         }
         const buffer = Buffer.from(await file.arrayBuffer());
+        if (key === "passportPhotograph" && file.type.startsWith("image/")) {
+          guarantorPassportImageDataUrl = `data:${file.type};base64,${buffer.toString(
+            "base64"
+          )}`;
+        }
         const id = await uploadBufferToGridFS(buffer, file.name, {
           field: key,
           owner: session.user.id,
           kind: "guarantor",
+          contentType: file.type || undefined,
         });
         guarantorFileIds[key] = id;
         guarantorDocumentNames[key] = file.name;
@@ -158,6 +172,8 @@ export async function POST(request: Request) {
       guarantorData: parsedPayload.guarantorData,
       supplierDocumentNames,
       guarantorDocumentNames,
+      supplierPassportImageDataUrl,
+      guarantorPassportImageDataUrl,
     });
 
     await sendSubmissionNotificationEmail({

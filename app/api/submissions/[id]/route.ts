@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
-import { uploadBufferToGridFS } from "@/lib/gridfs";
+import { downloadGridFSFileById, uploadBufferToGridFS } from "@/lib/gridfs";
 import { connectDB } from "@/lib/mongodb";
+import { generateSubmissionPdfBuffer } from "@/lib/submission-pdf";
 import {
   GUARANTOR_FILE_FIELDS,
   MAX_UPLOAD_BYTES,
@@ -24,6 +25,25 @@ const updatePayloadSchema = z.object({
   supplierDocumentNames: z.record(z.string(), z.string()).optional(),
   guarantorDocumentNames: z.record(z.string(), z.string()).optional(),
 });
+
+function detectMimeFromFilename(filename?: string): string | undefined {
+  if (!filename) return undefined;
+  const lower = filename.toLowerCase();
+  if (lower.endsWith(".png")) return "image/png";
+  if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return "image/jpeg";
+  if (lower.endsWith(".webp")) return "image/webp";
+  if (lower.endsWith(".gif")) return "image/gif";
+  return undefined;
+}
+
+function toImageDataUrl(file: { buffer: Buffer; contentType?: string; filename?: string } | null) {
+  if (!file) return undefined;
+  const mime = file.contentType ?? detectMimeFromFilename(file.filename);
+  if (!mime || !mime.startsWith("image/")) {
+    return undefined;
+  }
+  return `data:${mime};base64,${file.buffer.toString("base64")}`;
+}
 
 export async function GET(
   _request: Request,
@@ -55,6 +75,64 @@ export async function GET(
   }
 
   return NextResponse.json({ submission: toApplicationSubmission(submission) });
+}
+
+export async function POST(
+  _request: Request,
+  context: { params: Promise<{ id: string }> }
+) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { id } = await context.params;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return NextResponse.json({ error: "Invalid id" }, { status: 400 });
+  }
+
+  await connectDB();
+  const filter =
+    session.user.role === "admin"
+      ? { _id: new mongoose.Types.ObjectId(id) }
+      : {
+          _id: new mongoose.Types.ObjectId(id),
+          userId: new mongoose.Types.ObjectId(session.user.id),
+        };
+
+  const submission = await Submission.findOne(filter).lean();
+  if (!submission) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  const supplierFileIds = (submission.supplierFileIds ?? {}) as Record<string, string>;
+  const guarantorFileIds = (submission.guarantorFileIds ?? {}) as Record<string, string>;
+  const supplierPassportFile = await downloadGridFSFileById(
+    supplierFileIds.supplierPassport ?? ""
+  );
+  const guarantorPassportFile = await downloadGridFSFileById(
+    guarantorFileIds.passportPhotograph ?? ""
+  );
+
+  const pdfBuffer = await generateSubmissionPdfBuffer({
+    submissionId: submission._id.toString(),
+    submittedAt: submission.submittedAt,
+    supplierData: submission.supplierData,
+    guarantorData: submission.guarantorData,
+    supplierDocumentNames: (submission.supplierDocumentNames ?? {}) as Record<string, string>,
+    guarantorDocumentNames: (submission.guarantorDocumentNames ?? {}) as Record<string, string>,
+    supplierPassportImageDataUrl: toImageDataUrl(supplierPassportFile),
+    guarantorPassportImageDataUrl: toImageDataUrl(guarantorPassportFile),
+  });
+
+  return new NextResponse(pdfBuffer, {
+    status: 200,
+    headers: {
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename="lba-submission-${submission._id.toString()}.pdf"`,
+      "Cache-Control": "no-store",
+    },
+  });
 }
 
 export async function PATCH(
@@ -166,6 +244,7 @@ export async function PATCH(
           owner: session.user.id,
           kind: "supplier",
           mode: "edit",
+          contentType: file.type || undefined,
         });
         supplierFileIds[key] = uploadId;
         supplierDocumentNames[key] = file.name;
@@ -187,6 +266,7 @@ export async function PATCH(
           owner: session.user.id,
           kind: "guarantor",
           mode: "edit",
+          contentType: file.type || undefined,
         });
         guarantorFileIds[key] = uploadId;
         guarantorDocumentNames[key] = file.name;
