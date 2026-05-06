@@ -57,8 +57,7 @@ export async function downloadGridFSFileById(fileId: string): Promise<{
 
   const metadata = (fileDoc.metadata ?? {}) as Record<string, unknown>;
   const contentType =
-    (typeof metadata.contentType === "string" ? metadata.contentType : undefined) ??
-    (typeof fileDoc.contentType === "string" ? fileDoc.contentType : undefined);
+    typeof metadata.contentType === "string" ? metadata.contentType : undefined;
 
   return {
     buffer: Buffer.concat(chunks),
