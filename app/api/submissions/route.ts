@@ -150,31 +150,29 @@ export async function POST(request: Request) {
     submittedAt: new Date(),
   });
 
-  void (async () => {
-    try {
-      const pdfBuffer = await generateSubmissionPdfBuffer({
-        submissionId: submission._id.toString(),
-        submittedAt: submission.submittedAt,
-        supplierData: parsedPayload.supplierData,
-        guarantorData: parsedPayload.guarantorData,
-        supplierDocumentNames,
-        guarantorDocumentNames,
-      });
+  try {
+    const pdfBuffer = await generateSubmissionPdfBuffer({
+      submissionId: submission._id.toString(),
+      submittedAt: submission.submittedAt,
+      supplierData: parsedPayload.supplierData,
+      guarantorData: parsedPayload.guarantorData,
+      supplierDocumentNames,
+      guarantorDocumentNames,
+    });
 
-      await sendSubmissionNotificationEmail({
-        submissionId: submission._id.toString(),
-        supplierName:
-          parsedPayload.supplierData?.registeredCompanyName ??
-          parsedPayload.supplierData?.businessTradingName ??
-          "",
-        submittedAt: submission.submittedAt,
-        pdfBuffer,
-        uploadedFiles: uploadedFileAttachments,
-      });
-    } catch (error) {
-      console.error("[submission-email] failed to send notification", error);
-    }
-  })();
+    await sendSubmissionNotificationEmail({
+      submissionId: submission._id.toString(),
+      supplierName:
+        parsedPayload.supplierData?.registeredCompanyName ??
+        parsedPayload.supplierData?.businessTradingName ??
+        "",
+      submittedAt: submission.submittedAt,
+      pdfBuffer,
+      uploadedFiles: uploadedFileAttachments,
+    });
+  } catch (error) {
+    console.error("[submission-email] failed to send notification", error);
+  }
 
   return NextResponse.json(
     { id: submission._id.toString(), submission: toApplicationSubmission(submission) },
