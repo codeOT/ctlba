@@ -10,12 +10,25 @@ export function Field({
   value,
   onChange,
   type = "text",
+  maxDigits,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
-  type?: "text" | "email" | "tel" | "date";
+  type?: "text" | "email" | "tel" | "date" | "number";
+  maxDigits?: number;
 }) {
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const nextValue = event.target.value;
+    if (type !== "number") {
+      onChange(nextValue);
+      return;
+    }
+
+    const digitsOnly = nextValue.replace(/\D/g, "");
+    onChange(maxDigits ? digitsOnly.slice(0, maxDigits) : digitsOnly);
+  };
+
   return (
     <label className="flex flex-col gap-1.5">
       <span className="text-xs font-semibold uppercase tracking-wide text-zinc-600">
@@ -25,7 +38,9 @@ export function Field({
        
         type={type}
         value={value}
-        onChange={(event) => onChange(event.target.value)}
+        onChange={handleChange}
+        inputMode={type === "number" ? "numeric" : undefined}
+        pattern={type === "number" ? "\\d*" : undefined}
         className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-zinc-600 focus:ring-2 focus:ring-zinc-200"
       />
     </label>

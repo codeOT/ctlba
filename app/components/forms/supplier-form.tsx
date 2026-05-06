@@ -138,6 +138,8 @@ export default function SupplierForm({
         />
         <Field
           label="Director/Partner/Proprietor's NIN"
+          type="number"
+          maxDigits={11}
           value={supplierData.director1Nin}
           onChange={(value) =>
             setSupplierData((prev) => ({ ...prev, director1Nin: value }))
@@ -145,6 +147,8 @@ export default function SupplierForm({
         />
         <Field
           label="Director/Partner/Proprietor's BVN"
+          type="number"
+          maxDigits={11}
           value={supplierData.director1Bvn}
           onChange={(value) =>
             setSupplierData((prev) => ({ ...prev, director1Bvn: value }))
@@ -187,6 +191,8 @@ export default function SupplierForm({
         />
         <Field
           label="Director/Partner/Proprietor's NIN"
+          type="number"
+          maxDigits={11}
           value={supplierData.director2Nin}
           onChange={(value) =>
             setSupplierData((prev) => ({ ...prev, director2Nin: value }))
@@ -194,6 +200,8 @@ export default function SupplierForm({
         />
         <Field
           label="Director/Partner/Proprietor's BVN"
+          type="number"
+          maxDigits={11}
           value={supplierData.director2Bvn}
           onChange={(value) =>
             setSupplierData((prev) => ({ ...prev, director2Bvn: value }))

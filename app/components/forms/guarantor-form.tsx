@@ -103,11 +103,15 @@ export default function GuarantorForm({
         />
         <Field
           label="NIN"
+          type="number"
+          maxDigits={11}
           value={guarantorData.nin}
           onChange={(value) => setGuarantorData((prev) => ({ ...prev, nin: value }))}
         />
         <Field
           label="BVN"
+          type="number"
+          maxDigits={11}
           value={guarantorData.bvn}
           onChange={(value) => setGuarantorData((prev) => ({ ...prev, bvn: value }))}
         />
