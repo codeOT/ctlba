@@ -385,22 +385,30 @@ export default function SupplierOnboardingPortal({
   };
 
   return (
-    <main className="min-h-screen px-4 py-8 text-zinc-900 md:py-12">
-      <div className="mx-auto mb-4 flex max-w-5xl flex-wrap items-center justify-end gap-3 text-sm">
-        <Link
-          href="/dashboard"
-          className="rounded-md border border-zinc-300 px-3 py-1.5 font-medium text-zinc-700 hover:bg-zinc-100"
-        >
-          Dashboard
-        </Link>
-        <span className="text-zinc-600">{session?.user?.email}</span>
-        <button
-          type="button"
-          onClick={() => signOut({ callbackUrl: "/login" })}
-          className="rounded-md border border-zinc-300 px-3 py-1.5 font-medium text-zinc-700 hover:bg-zinc-100"
-        >
-          Sign out
-        </button>
+    <main className="min-h-screen bg-slate-50 px-4 pb-8 text-zinc-900 md:pb-12">
+      <div className="sticky top-0 z-30 -mx-4 mb-6 border-b border-slate-200 bg-white/95 backdrop-blur">
+        <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-3">
+          <div className="flex items-center gap-2.5">
+            <Image src="/ct1.png" alt="Cardinal Torch Logo" width={34} height={34} />
+            <span className="text-lg font-semibold text-zinc-900">LBA Portal</span>
+          </div>
+        
+          <div className="flex items-center gap-2">
+            <Link
+              href="/dashboard"
+              className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-100"
+            >
+              Dashboard
+            </Link>
+            <button
+              type="button"
+              onClick={() => signOut({ callbackUrl: "/login" })}
+              className="rounded-md bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-zinc-700"
+            >
+              Sign out
+            </button>
+          </div>
+        </div>
       </div>
       <section className="mx-auto w-full max-w-5xl rounded-lg border border-zinc-300 bg-white p-6 shadow-sm md:p-10">
        <span className="flex justify-center ">

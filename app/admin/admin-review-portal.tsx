@@ -1,6 +1,8 @@
 "use client";
 
 import { signOut } from "next-auth/react";
+import Image from "next/image";
+import Link from "next/link";
 import { jsPDF } from "jspdf";
 import { useEffect, useState } from "react";
 import { ApplicationSubmission } from "../components/forms/types";
@@ -121,7 +123,33 @@ export default function AdminReviewPortal() {
   const rejectedCount = submissions.filter((item) => item.status === "rejected").length;
 
   return (
-    <main className="min-h-screen px-4 py-8 md:py-12">
+    <main className="min-h-screen bg-slate-50 px-4 pb-8 md:pb-12">
+      <div className="sticky top-0 z-30 -mx-4 mb-6 border-b border-slate-200 bg-white/95 backdrop-blur">
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-3">
+          <div className="flex items-center gap-2.5">
+            <Image src="/ct1.png" alt="Cardinal Torch Logo" width={34} height={34} />
+            <span className="text-lg font-semibold text-zinc-900">LBA Admin</span>
+          </div>
+          <div className="hidden min-w-[240px] flex-1 rounded-md border border-slate-200 bg-slate-100 px-3 py-2 text-sm text-zinc-600 md:block">
+            Cardinal Torch Operations
+          </div>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/"
+              className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-100"
+            >
+              User Portal
+            </Link>
+            <button
+              type="button"
+              onClick={() => signOut({ callbackUrl: "/admin/login" })}
+              className="rounded-md bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-zinc-700"
+            >
+              Sign out
+            </button>
+          </div>
+        </div>
+      </div>
       <section className="mx-auto w-full max-w-6xl rounded-lg border border-zinc-300 bg-white p-6 shadow-sm md:p-10">
         <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
           <div>
@@ -135,13 +163,6 @@ export default function AdminReviewPortal() {
               Review supplier applications, accept or reject submissions, and export PDFs.
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => signOut({ callbackUrl: "/admin/login" })}
-            className="rounded-md border border-zinc-300 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100"
-          >
-            Sign out
-          </button>
         </header>
 
         <div className="mb-6 grid gap-3 md:grid-cols-4">

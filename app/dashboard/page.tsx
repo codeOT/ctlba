@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { connectDB } from "@/lib/mongodb";
 import Submission from "@/models/Submission";
+import Image from "next/image";
 import mongoose from "mongoose";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -22,7 +23,26 @@ export default async function DashboardPage() {
     .lean();
 
   return (
-    <main className="min-h-screen px-4 py-8 md:py-12">
+    <main className="min-h-screen bg-slate-50 px-4 pb-8 md:pb-12">
+      <div className="sticky top-0 z-30 -mx-4 mb-6 border-b border-slate-200 bg-white/95 backdrop-blur">
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-3">
+          <div className="flex items-center gap-2.5">
+            <Image src="/ct1.png" alt="Cardinal Torch Logo" width={34} height={34} />
+            <span className="text-lg font-semibold text-zinc-900">LBA Portal</span>
+          </div>
+          <div className="hidden min-w-[220px] flex-1 rounded-md border border-slate-200 bg-slate-100 px-3 py-2 text-sm text-zinc-600 md:block">
+            Supplier Dashboard
+          </div>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/"
+              className="rounded-md bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-zinc-700"
+            >
+              New Submission
+            </Link>
+          </div>
+        </div>
+      </div>
       <section className="mx-auto w-full max-w-6xl rounded-lg border border-zinc-300 bg-white p-6 shadow-sm md:p-10">
         <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <div>
@@ -36,12 +56,6 @@ export default async function DashboardPage() {
               View submitted forms and edit pending submissions.
             </p>
           </div>
-          <Link
-            href="/"
-            className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
-          >
-            New Submission
-          </Link>
         </header>
 
         {submissions.length === 0 ? (
