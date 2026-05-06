@@ -65,7 +65,6 @@ export type SupportingDocuments = {
   firsRegistrationProof: File | null;
   auditedFinancialStatements: File | null;
   validMeansOfIdentification: File | null;
-  executedGuarantorForm: File | null;
 };
 
 export type GuarantorSupportingDocuments = {
@@ -155,7 +154,6 @@ export const defaultSupportingDocuments: SupportingDocuments = {
   firsRegistrationProof: null,
   auditedFinancialStatements: null,
   validMeansOfIdentification: null,
-  executedGuarantorForm: null,
 };
 
 export const defaultGuarantorSupportingDocuments: GuarantorSupportingDocuments = {

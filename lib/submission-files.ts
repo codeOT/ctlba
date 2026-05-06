@@ -7,7 +7,6 @@ export const SUPPLIER_FILE_FIELDS = [
   "firsRegistrationProof",
   "auditedFinancialStatements",
   "validMeansOfIdentification",
-  "executedGuarantorForm",
 ] as const;
 
 export const GUARANTOR_FILE_FIELDS = [

@@ -316,8 +316,8 @@ export default function SupplierForm({
           Required Supporting Documents
         </h3>
         <p className="mb-4 text-sm text-zinc-700">
-          Upload all documents below. Note: Executed Guarantor Form, Proof of
-          registration with FIRS, and Audited Financial Statements are optional.
+          Upload all documents below. Note: Proof of registration with FIRS and
+          Audited Financial Statements are optional.
         </p>
         <div className="grid gap-4 md:grid-cols-2">
           <FileField
@@ -360,7 +360,7 @@ export default function SupplierForm({
             }
           />
           <FileField
-            label="Proof of registration with FIRS (Optional)"
+            label="Proof of registration with FIRS"
             onChange={(file) =>
               setSupportingDocuments((prev) => ({
                 ...prev,
@@ -369,7 +369,7 @@ export default function SupplierForm({
             }
           />
           <FileField
-            label="Audited financial statements (Optional)"
+            label="Audited financial statements"
             onChange={(file) =>
               setSupportingDocuments((prev) => ({
                 ...prev,
@@ -383,15 +383,6 @@ export default function SupplierForm({
               setSupportingDocuments((prev) => ({
                 ...prev,
                 validMeansOfIdentification: file,
-              }))
-            }
-          />
-          <FileField
-            label="Executed Guarantor Form (Optional)"
-            onChange={(file) =>
-              setSupportingDocuments((prev) => ({
-                ...prev,
-                executedGuarantorForm: file,
               }))
             }
           />

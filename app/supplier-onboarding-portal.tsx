@@ -405,10 +405,6 @@ export default function SupplierOnboardingPortal({
       "Valid means of identification",
       supportingDocuments.validMeansOfIdentification?.name ?? "-"
     );
-    drawRow(
-      "Executed Guarantor Form",
-      supportingDocuments.executedGuarantorForm?.name ?? "-"
-    );
 
     drawSectionTitle("Guarantor Information");
     if (guarantorPassportImage) {

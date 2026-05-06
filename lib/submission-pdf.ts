@@ -194,10 +194,6 @@ export async function generateSubmissionPdfBuffer(
     "Valid means of identification",
     input.supplierDocumentNames.validMeansOfIdentification ?? "-"
   );
-  drawRow(
-    "Executed Guarantor Form",
-    input.supplierDocumentNames.executedGuarantorForm ?? "-"
-  );
 
   drawSectionTitle("Guarantor Information");
   if (input.guarantorPassportImageDataUrl) {
