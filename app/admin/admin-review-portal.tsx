@@ -130,16 +130,9 @@ export default function AdminReviewPortal() {
             <Image src="/ct1.png" alt="Cardinal Torch Logo" width={34} height={34} />
             <span className="text-lg font-semibold text-zinc-900">LBA Admin</span>
           </div>
-          <div className="hidden min-w-[240px] flex-1 rounded-md border border-slate-200 bg-slate-100 px-3 py-2 text-sm text-zinc-600 md:block">
-            Cardinal Torch Operations
-          </div>
+          
           <div className="flex items-center gap-2">
-            <Link
-              href="/"
-              className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-100"
-            >
-              User Portal
-            </Link>
+           
             <button
               type="button"
               onClick={() => signOut({ callbackUrl: "/admin/login" })}
