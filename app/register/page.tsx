@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
 import { FormEvent, useState } from "react";
 import Image from "next/image";
+
+const PENDING_AUTH_KEY = "lba_pending_auth_v1";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -12,11 +13,13 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError("");
+    setSuccess("");
     setLoading(true);
     try {
       const res = await fetch("/api/auth/register", {
@@ -30,21 +33,16 @@ export default function RegisterPage() {
         setLoading(false);
         return;
       }
-      const signInResult = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
-      if (signInResult?.error) {
-        setError(
-          "Account created but sign-in failed. Please sign in manually.",
-        );
-        setLoading(false);
-        router.push("/login");
-        return;
-      }
-      router.push("/");
-      router.refresh();
+      window.sessionStorage.setItem(
+        PENDING_AUTH_KEY,
+        JSON.stringify({
+          email: email.trim().toLowerCase(),
+          password,
+        })
+      );
+      setSuccess("Account created. Check your email for the 6-digit verification code.");
+      router.push(`/verify-email?email=${encodeURIComponent(email.trim())}`);
+      return;
     } catch {
       setError("Something went wrong.");
     }
@@ -103,6 +101,7 @@ export default function RegisterPage() {
             />
           </label>
           {error ? <p className="text-sm text-rose-600">{error}</p> : null}
+          {success ? <p className="text-sm text-emerald-700">{success}</p> : null}
           <button
             type="submit"
             disabled={loading}

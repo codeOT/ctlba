@@ -11,9 +11,16 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? "/";
   const resetOk = searchParams.get("reset") === "1";
-  const [email, setEmail] = useState("");
+  const verifyPrompt = searchParams.get("verify") === "1";
+  const initialEmail = searchParams.get("email") ?? "";
+  const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState(
+    verifyPrompt
+      ? "Account created successfully. Please verify your email before signing in."
+      : ""
+  );
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -27,7 +34,7 @@ function LoginForm() {
     });
     setLoading(false);
     if (result?.error) {
-      setError("Invalid email or password.");
+      setError("Invalid email/password, or email not yet verified.");
       return;
     }
     router.push(callbackUrl);
@@ -49,6 +56,11 @@ function LoginForm() {
         {resetOk ? (
           <p className="mt-3 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
             Your password was updated. You can sign in below.
+          </p>
+        ) : null}
+        {notice ? (
+          <p className="mt-3 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-800">
+            {notice}
           </p>
         ) : null}
         <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
@@ -83,14 +95,15 @@ function LoginForm() {
             {loading ? "Signing in…" : "Sign in"}
           </button>
         </form>
-        <div className="mt-4 flex flex-col gap-2 text-sm text-zinc-600">
+        <div className="mt-5 space-y-3 text-sm">
+          <div className="flex flex-col gap-2 text-zinc-600">
           <Link href="/register" className="text-zinc-900 underline">
             Create an account
           </Link>
           <Link href="/forgot-password" className="text-zinc-900 underline">
             Forgot password?
           </Link>
-         
+          </div>
         </div>
       </div>
     </main>

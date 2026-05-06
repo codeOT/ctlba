@@ -22,7 +22,7 @@ export function Field({
         {label}
       </span>
       <input
-        required
+       
         type={type}
         value={value}
         onChange={(event) => onChange(event.target.value)}
@@ -47,7 +47,7 @@ export function TextArea({
         {label}
       </span>
       <textarea
-        required
+        
         value={value}
         onChange={(event) => onChange(event.target.value)}
         rows={4}

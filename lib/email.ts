@@ -40,6 +40,28 @@ export async function sendPasswordResetEmail(
   return { skipped: false as const };
 }
 
+export async function sendEmailVerificationEmail(
+  to: string,
+  verificationCode: string
+) {
+  if (!resend) {
+    console.warn(
+      "[email] RESEND_API_KEY not set; verification code (not sent):",
+      verificationCode
+    );
+    return { skipped: true as const };
+  }
+
+  await resend.emails.send({
+    from,
+    to,
+    subject: "Your LBA email verification code",
+    text: `Welcome to the LBA Supplier Portal.\n\nUse this code to verify your email address:\n\n${verificationCode}\n\nThis code expires in 24 hours.`,
+  });
+
+  return { skipped: false as const };
+}
+
 export async function sendSubmissionNotificationEmail(params: {
   submissionId: string;
   supplierName: string;
